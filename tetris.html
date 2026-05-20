@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄罗斯方块</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: 'Consolas', 'Courier New', monospace;
+  color: #eee;
+}
+.container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+#gameCanvas {
+  border: 2px solid #333;
+  background: #0f0f1a;
+}
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 140px;
+}
+.panel {
+  background: #16213e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+}
+.panel h3 {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#nextCanvas {
+  display: block;
+  background: #0f0f1a;
+  border-radius: 4px;
+}
+.score-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #e94560;
+}
+.controls {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.8;
+}
+.controls span {
+  color: #aaa;
+}
+.game-over-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.game-over-box {
+  background: #16213e;
+  border: 2px solid #e94560;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+.game-over-box h2 {
+  font-size: 32px;
+  color: #e94560;
+  margin-bottom: 12px;
+}
+.game-over-box p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+.game-over-box button {
+  background: #e94560;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.game-over-box button:hover {
+  background: #c73650;
+}
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <canvas id="gameCanvas"></canvas>
+  <div class="sidebar">
+    <div class="panel">
+      <h3>下一个</h3>
+      <canvas id="nextCanvas"></canvas>
+    </div>
+    <div class="panel">
+      <h3>分数</h3>
+      <div class="score-value" id="score">0</div>
+    </div>
+    <div class="panel">
+      <h3>等级</h3>
+      <div class="score-value" id="level">1</div>
+    </div>
+    <div class="panel">
+      <h3>消除行数</h3>
+      <div class="score-value" id="lines">0</div>
+    </div>
+    <div class="panel controls">
+      <span>← →</span> 移动<br>
+      <span>↑</span> 旋转<br>
+      <span>↓</span> 软降<br>
+      <span>空格</span> 硬降<br>
+      <span>P</span> 暂停
+    </div>
+  </div>
+</div>
+
+<div class="game-over-overlay hidden" id="gameOverOverlay">
+  <div class="game-over-box">
+    <h2>游戏结束</h2>
+    <p>最终得分: <strong id="finalScore">0</strong></p>
+    <button onclick="restart()">重新开始</button>
+  </div>
+</div>
+
+<script>
+const COLS = 10;
+const ROWS = 20;
+const BLOCK = 30;
+const COLORS = ['#0f0f1a','#00d2ff','#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c084fc','#ff8c42'];
+
+// Tetromino shapes: [rotation][row][col]
+const SHAPES = {
+  I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  O: [[1,1],[1,1]],
+  T: [[0,1,0],[1,1,1],[0,0,0]],
+  S: [[0,1,1],[1,1,0],[0,0,0]],
+  Z: [[1,1,0],[0,1,1],[0,0,0]],
+  J: [[1,0,0],[1,1,1],[0,0,0]],
+  L: [[0,0,1],[1,1,1],[0,0,0]],
+};
+const PIECES = 'IOTSZJL'.split('');
+const COLOR_MAP = { I:1, O:2, T:3, S:4, Z:5, J:6, L:7 };
+
+let board, piece, pieceX, pieceY, pieceType, nextType, score, level, lines, gameOver, paused, dropTimer;
+
+const gameCanvas = document.getElementById('gameCanvas');
+const gameCtx = gameCanvas.getContext('2d');
+const nextCanvas = document.getElementById('nextCanvas');
+const nextCtx = nextCanvas.getContext('2d');
+gameCanvas.width = COLS * BLOCK;
+gameCanvas.height = ROWS * BLOCK;
+nextCanvas.width = 4 * BLOCK;
+nextCanvas.height = 4 * BLOCK;
+
+function createBoard() {
+  return Array.from({length: ROWS}, () => Array(COLS).fill(0));
+}
+
+function randomPiece() {
+  return PIECES[Math.floor(Math.random() * PIECES.length)];
+}
+
+function rotate(shape) {
+  const n = shape.length;
+  const r = Array.from({length: n}, () => Array(n).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++)
+      r[j][n-1-i] = shape[i][j];
+  return r;
+}
+
+function getShape(type) {
+  return SHAPES[type].map(row => [...row]);
+}
+
+function collides(board, shape, px, py) {
+  for (let r = 0; r < shape.length; r++) {
+    for (let c = 0; c < shape[r].length; c++) {
+      if (!shape[r][c]) continue;
+      const x = px + c;
+      const y = py + r;
+      if (x < 0 || x >= COLS || y >= ROWS) return true;
+      if (y < 0) continue;
+      if (board[y][x]) return true;
+    }
+  }
+  return false;
+}
+
+function lockPiece() {
+  const shape = getShape(pieceType);
+  for (let r = 0; r < shape.length; r++) {
+    for (let c = 0; c < shape[r].length; c++) {
+      if (!shape[r][c]) continue;
+      const x = pieceX + c;
+      const y = pieceY + r;
+      if (y < 0) { triggerGameOver(); return; }
+      board[y][x] = COLOR_MAP[pieceType];
+    }
+  }
+  clearLines();
+  spawnPiece();
+}
+
+function clearLines() {
+  let cleared = 0;
+  for (let r = ROWS - 1; r >= 0; r--) {
+    if (board[r].every(cell => cell)) {
+      board.splice(r, 1);
+      board.unshift(Array(COLS).fill(0));
+      cleared++;
+      r++; // re-check this row
+    }
+  }
+  if (cleared) {
+    const pts = [0, 100, 300, 500, 800];
+    score += pts[cleared] * level;
+    lines += cleared;
+    level = Math.floor(lines / 10) + 1;
+    updateUI();
+  }
+}
+
+function spawnPiece() {
+  pieceType = nextType;
+  nextType = randomPiece();
+  pieceX = Math.floor((COLS - SHAPES[pieceType][0].length) / 2);
+  pieceY = -1;
+  if (collides(board, getShape(pieceType), pieceX, pieceY)) {
+    triggerGameOver();
+  }
+  dropTimer = performance.now();
+  drawNext();
+}
+
+function movePiece(dx, dy) {
+  const shape = getShape(pieceType);
+  if (!collides(board, shape, pieceX + dx, pieceY + dy)) {
+    pieceX += dx;
+    pieceY += dy;
+    return true;
+  }
+  return false;
+}
+
+function rotatePiece() {
+  const shape = getShape(pieceType);
+  const rotated = rotate(shape);
+  // Try normal, then wall kicks
+  const kicks = [[0,0],[1,0],[-1,0],[0,-1],[2,0],[-2,0]];
+  for (const [kx, ky] of kicks) {
+    if (!collides(board, rotated, pieceX + kx, pieceY + ky)) {
+      pieceX += kx;
+      pieceY += ky;
+      return true;
+    }
+  }
+  return false;
+}
+
+function hardDrop() {
+  while (movePiece(0, 1)) {}
+  lockPiece();
+}
+
+function triggerGameOver() {
+  gameOver = true;
+  document.getElementById('gameOverOverlay').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = score;
+}
+
+function updateUI() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('level').textContent = level;
+  document.getElementById('lines').textContent = lines;
+}
+
+function drawBlock(ctx, x, y, colorIdx) {
+  if (!colorIdx) return;
+  ctx.fillStyle = COLORS[colorIdx];
+  ctx.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, BLOCK - 2);
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, 6);
+  ctx.fillRect(x * BLOCK + 1, y * BLOCK + 1, 6, BLOCK - 2);
+}
+
+function drawBoard() {
+  gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+  // Grid
+  gameCtx.strokeStyle = '#1a1a2e';
+  gameCtx.lineWidth = 0.5;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      gameCtx.strokeRect(c * BLOCK, r * BLOCK, BLOCK, BLOCK);
+    }
+  }
+  // Locked blocks
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      drawBlock(gameCtx, c, r, board[r][c]);
+    }
+  }
+  // Ghost piece
+  const shape = getShape(pieceType);
+  let gy = pieceY;
+  while (!collides(board, shape, pieceX, gy + 1)) gy++;
+  for (let r = 0; r < shape.length; r++) {
+    for (let c = 0; c < shape[r].length; c++) {
+      if (shape[r][c] && gy + r >= 0) {
+        gameCtx.fillStyle = 'rgba(255,255,255,0.1)';
+        gameCtx.fillRect((pieceX+c)*BLOCK+1, (gy+r)*BLOCK+1, BLOCK-2, BLOCK-2);
+      }
+    }
+  }
+  // Active piece
+  for (let r = 0; r < shape.length; r++) {
+    for (let c = 0; c < shape[r].length; c++) {
+      if (shape[r][c] && pieceY + r >= 0) {
+        drawBlock(gameCtx, pieceX + c, pieceY + r, COLOR_MAP[pieceType]);
+      }
+    }
+  }
+}
+
+function drawNext() {
+  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  const shape = SHAPES[nextType];
+  const offsetX = (4 - shape[0].length) / 2;
+  const offsetY = (4 - shape.length) / 2;
+  for (let r = 0; r < shape.length; r++) {
+    for (let c = 0; c < shape[r].length; c++) {
+      if (shape[r][c]) {
+        drawBlock(nextCtx, offsetX + c, offsetY + r, COLOR_MAP[nextType]);
+      }
+    }
+  }
+}
+
+function gameLoop(now) {
+  if (gameOver) { requestAnimationFrame(gameLoop); return; }
+  if (paused) { dropTimer = now; drawBoard(); requestAnimationFrame(gameLoop); return; }
+
+  const speed = Math.max(50, 800 - (level - 1) * 70);
+  if (now - dropTimer > speed) {
+    if (!movePiece(0, 1)) lockPiece();
+    dropTimer = now;
+  }
+  drawBoard();
+  requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener('keydown', e => {
+  if (gameOver) return;
+  if (e.key === 'p' || e.key === 'P') { paused = !paused; e.preventDefault(); return; }
+  if (paused) return;
+  switch (e.key) {
+    case 'ArrowLeft':  movePiece(-1, 0); e.preventDefault(); break;
+    case 'ArrowRight': movePiece(1, 0);  e.preventDefault(); break;
+    case 'ArrowDown':  movePiece(0, 1); score += 1; updateUI(); e.preventDefault(); break;
+    case 'ArrowUp':    rotatePiece();    e.preventDefault(); break;
+    case ' ':          hardDrop();       e.preventDefault(); break;
+  }
+});
+
+function restart() {
+  board = createBoard();
+  score = 0; level = 1; lines = 0; gameOver = false; paused = false;
+  nextType = randomPiece();
+  updateUI();
+  spawnPiece();
+  document.getElementById('gameOverOverlay').classList.add('hidden');
+}
+
+restart();
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
