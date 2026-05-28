@@ -1,0 +1,57 @@
+name: 每日荐书生成
+
+on:
+  schedule:
+    # 每天北京时间 20:00 (UTC 12:00)
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      book_title:
+        description: '手动指定书名（可选）'
+        required: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install system dependencies (fonts for SVG rendering)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Install npm dependencies
+        working-directory: xiaohongshu-bot
+        run: npm ci
+
+      - name: Generate daily post
+        working-directory: xiaohongshu-bot
+        env:
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
+        run: node schedule.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "小红书荐书机器人"
+          git config user.email "bot@xiaohongshu.book"
+          git add xiaohongshu-bot/posts/ xiaohongshu-bot/books.json
+          git diff --cached --quiet || git commit -m "📚 今日荐书 — $(date +%Y-%m-%d)"
+          git push origin master
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-$(date +%Y%m%d)
+          path: xiaohongshu-bot/posts/
+          retention-days: 7
