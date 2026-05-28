@@ -8,7 +8,6 @@
     "test": "node --test"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
     "sharp": "^0.33.0"
   }
 }

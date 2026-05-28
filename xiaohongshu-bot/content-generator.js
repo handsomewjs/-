@@ -1,4 +1,3 @@
-const Anthropic = require('@anthropic-ai/sdk');
 const config = require('./config');
 
 const SYSTEM_PROMPT = `你是一个小红读书博主，经营着一个"每日荐书"账号。你的粉丝是25-35岁的年轻人，喜欢有态度、有深度的内容，但不喜欢说教。
@@ -28,7 +27,7 @@ function buildUserPrompt(book) {
 出版信息：${book.publisher}，${book.year}年`;
 }
 
-function parseClaudeResponse(text) {
+function parseAiResponse(text) {
   const cleaned = text
     .replace(/```json\s*/g, '')
     .replace(/```\s*/g, '')
@@ -37,7 +36,7 @@ function parseClaudeResponse(text) {
   let parsed;
   try {
     parsed = JSON.parse(cleaned);
-  } catch (_first) {
+  } catch {
     const jsonMatch = cleaned.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/);
     if (!jsonMatch) throw new Error('No JSON found in response');
     parsed = JSON.parse(jsonMatch[0]);
@@ -73,29 +72,43 @@ function buildFallbackContent(book) {
 }
 
 async function generateContent(bookData) {
-  if (!config.claudeApiKey) {
-    console.warn('CLAUDE_API_KEY not set, using fallback content');
+  if (!config.deepseekApiKey) {
+    console.warn('DEEPSEEK_API_KEY not set, using fallback content');
     return buildFallbackContent(bookData);
   }
 
-  const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
+  const url = `${config.aiBaseUrl}/chat/completions`;
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const msg = await anthropic.messages.create({
-        model: config.claudeModel,
-        max_tokens: config.claudeMaxTokens,
-        temperature: config.claudeTemperature,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: buildUserPrompt(bookData) }],
-        timeout: 30000,
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.deepseekApiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.aiModel,
+          max_tokens: config.aiMaxTokens,
+          temperature: config.aiTemperature,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: buildUserPrompt(bookData) },
+          ],
+        }),
+        signal: AbortSignal.timeout(60000),
       });
 
-      const textBlock = msg.content.find(b => b.type === 'text');
-      if (!textBlock) throw new Error('No text in response');
-      const raw = textBlock.text;
-      const result = parseClaudeResponse(raw);
-      return result;
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`DeepSeek API error ${res.status}: ${errText.slice(0, 200)}`);
+      }
+
+      const data = await res.json();
+      const raw = data.choices?.[0]?.message?.content;
+      if (!raw) throw new Error('No content in response');
+
+      return parseAiResponse(raw);
     } catch (err) {
       console.error(`Content generation attempt ${attempt + 1} failed:`, err.message);
       if (attempt === 1) break;

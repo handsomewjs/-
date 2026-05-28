@@ -1,7 +1,7 @@
 const path = require('path');
 
 const config = {
-  claudeApiKey: process.env.CLAUDE_API_KEY || '',
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
   googleBooksApiKey: process.env.GOOGLE_BOOKS_API_KEY || '',
 
   imageWidth: 1080,
@@ -10,9 +10,10 @@ const config = {
   booksFile: path.join(__dirname, 'books.json'),
   postsDir: path.join(__dirname, 'posts'),
 
-  claudeModel: 'claude-3-5-haiku-latest',
-  claudeMaxTokens: 2000,
-  claudeTemperature: 0.75,
+  aiModel: 'deepseek-chat',
+  aiBaseUrl: 'https://api.deepseek.com/v1',
+  aiMaxTokens: 2000,
+  aiTemperature: 0.75,
 
   maxImages: 8,
   maxQuotes: 5,
