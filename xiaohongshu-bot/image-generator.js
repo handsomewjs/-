@@ -151,13 +151,14 @@ async function generateImages(bookData, content, coverPath, outputDir) {
   }
 
   // 2. Quote cards (up to maxQuotes)
-  const quoteCount = Math.min(content.quotes.length, config.maxQuotes);
+  const quoteArr = content.quotes || [];
+  const quoteCount = Math.min(quoteArr.length, config.maxQuotes);
   const totalCards = quoteCount + 2; // cover + quotes + follow
 
   for (let i = 0; i < quoteCount; i++) {
     try {
       const num = String(i + 2).padStart(2, '0');
-      const quoteSvg = buildQuoteSvg(content.quotes[i], i + 2, totalCards);
+      const quoteSvg = buildQuoteSvg(quoteArr[i], i + 2, totalCards);
       const quoteOut = path.join(outputDir, `${num}-quote.png`);
       await renderSvgToPng(quoteSvg, quoteOut);
       images.push(quoteOut);
