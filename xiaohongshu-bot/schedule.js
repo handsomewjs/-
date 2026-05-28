@@ -19,7 +19,7 @@ async function main() {
   // 1. Get next book from queue
   const book = getNextBook();
   if (!book) {
-    console.error('书单已空，请添加新书到 books.json 或设置 GOOGLE_BOOKS_API_KEY 以启用自动获取');
+    console.error('书单已空！请编辑 books.json 添加新书后重新运行。');
     process.exit(1);
   }
   console.log(`[1/5] 选定书籍：《${book.title}》- ${book.author}`);

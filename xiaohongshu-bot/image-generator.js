@@ -52,21 +52,21 @@ function buildCoverSvg(book, content, coverPath) {
   <!-- Cover image placeholder -->
   <rect x="240" y="160" width="600" height="840" rx="12" fill="#2a2a3a" opacity="0.5"/>
   ${coverPath
-    ? `<image href="file:///${path.resolve(coverPath).replace(/\\/g, '/')}" x="260" y="180" width="560" height="800" preserveAspectRatio="xMidYMid slice"/>`
-    : `<text x="540" y="600" text-anchor="middle" font-family="sans-serif" font-size="64" fill="#555">📚</text>`}
+    ? `<image href="file://${path.resolve(coverPath).replace(/\\/g, '/')}" x="260" y="180" width="560" height="800" preserveAspectRatio="xMidYMid slice"/>`
+    : `<text x="540" y="600" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="64" fill="#555">📚</text>`}
 
   <!-- Book title -->
-  <text x="540" y="1100" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="bold" fill="${p.text}">${escapedTitle}</text>
+  <text x="540" y="1100" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="48" font-weight="bold" fill="${p.text}">${escapedTitle}</text>
 
   <!-- Author -->
-  <text x="540" y="1170" text-anchor="middle" font-family="sans-serif" font-size="32" fill="${p.accent}">${escapedAuthor} 著</text>
+  <text x="540" y="1170" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="32" fill="${p.accent}">${escapedAuthor} 著</text>
 
   <!-- Quote preview -->
-  <text x="540" y="1260" text-anchor="middle" font-family="sans-serif" font-size="26" fill="${p.text}" opacity="0.6">"${escapeXml(displayQuote)}"</text>
+  <text x="540" y="1260" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.6">"${escapeXml(displayQuote)}"</text>
 
   <!-- Brand badge -->
   <rect x="340" y="1330" width="400" height="50" rx="25" fill="${p.accent}" opacity="0.15"/>
-  <text x="540" y="1363" text-anchor="middle" font-family="sans-serif" font-size="22" fill="${p.accent}">每日荐书 · 关注我每天一本好书</text>
+  <text x="540" y="1363" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="22" fill="${p.accent}">每日荐书 · 关注我每天一本好书</text>
 </svg>`;
 }
 
@@ -77,7 +77,7 @@ function buildQuoteSvg(quote, index, total) {
   const yStart = H / 2 - (qLines.length - 1) * 35;
 
   const quoteTextEls = qLines.map((line, i) =>
-    `<text x="540" y="${yStart + i * 70}" text-anchor="middle" font-family="sans-serif" font-size="42" font-weight="bold" fill="${p.text}">${escapeXml(line)}</text>`
+    `<text x="540" y="${yStart + i * 70}" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="42" font-weight="bold" fill="${p.text}">${escapeXml(line)}</text>`
   ).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -94,12 +94,12 @@ function buildQuoteSvg(quote, index, total) {
   <line x1="340" y1="${yStart - 80}" x2="740" y2="${yStart - 80}" stroke="${p.accent}" stroke-width="3" opacity="0.6"/>
 
   <!-- Opening quote mark -->
-  <text x="540" y="${yStart - 120}" text-anchor="middle" font-family="serif" font-size="100" fill="${p.accent}" opacity="0.25">"</text>
+  <text x="540" y="${yStart - 120}" text-anchor="middle" font-family="'Noto Serif CJK SC', serif" font-size="100" fill="${p.accent}" opacity="0.25">"</text>
 
   ${quoteTextEls}
 
   <!-- Card number -->
-  <text x="540" y="1350" text-anchor="middle" font-family="sans-serif" font-size="20" fill="${p.text}" opacity="0.25">${index} / ${total}</text>
+  <text x="540" y="1350" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="20" fill="${p.text}" opacity="0.25">${index} / ${total}</text>
 </svg>`;
 }
 
@@ -118,15 +118,15 @@ function buildFollowSvg(bookTitle) {
   </defs>
   <rect width="${W}" height="${H}" fill="url(#grad)"/>
 
-  <text x="540" y="520" text-anchor="middle" font-family="sans-serif" font-size="72" fill="${p.accent}">📖</text>
-  <text x="540" y="620" text-anchor="middle" font-family="sans-serif" font-size="36" font-weight="bold" fill="${p.text}">今天的好书就推荐到这里</text>
-  <text x="540" y="690" text-anchor="middle" font-family="sans-serif" font-size="26" fill="${p.text}" opacity="0.7">如果你也读过《${escapedTitle}》</text>
-  <text x="540" y="740" text-anchor="middle" font-family="sans-serif" font-size="26" fill="${p.text}" opacity="0.7">欢迎在评论区聊聊你的感受</text>
+  <text x="540" y="520" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="72" fill="${p.accent}">📖</text>
+  <text x="540" y="620" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="36" font-weight="bold" fill="${p.text}">今天的好书就推荐到这里</text>
+  <text x="540" y="690" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.7">如果你也读过《${escapedTitle}》</text>
+  <text x="540" y="740" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.7">欢迎在评论区聊聊你的感受</text>
 
   <rect x="270" y="840" width="540" height="70" rx="35" fill="${p.accent}" opacity="0.12"/>
-  <text x="540" y="885" text-anchor="middle" font-family="sans-serif" font-size="36" font-weight="bold" fill="${p.accent}">关注我 · 每天一本好书</text>
+  <text x="540" y="885" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="36" font-weight="bold" fill="${p.accent}">关注我 · 每天一本好书</text>
 
-  <text x="540" y="960" text-anchor="middle" font-family="sans-serif" font-size="22" fill="${p.text}" opacity="0.3">每晚 8 点更新</text>
+  <text x="540" y="960" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="22" fill="${p.text}" opacity="0.3">每晚 8 点更新</text>
 </svg>`;
 }
 

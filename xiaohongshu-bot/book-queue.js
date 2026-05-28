@@ -46,10 +46,22 @@ function addBook(title, author) {
   }
 }
 
+function resetBook(title) {
+  const books = readBooks();
+  const book = books.find(b => b.title === title);
+  if (book) {
+    book.used = false;
+    delete book.usedDate;
+    writeBooks(books);
+    return true;
+  }
+  return false;
+}
+
 function getQueueStats() {
   const books = readBooks();
   const remaining = books.filter(b => !b.used).length;
   return { total: books.length, remaining, used: books.length - remaining };
 }
 
-module.exports = { getNextBook, addBook, getQueueStats };
+module.exports = { getNextBook, addBook, getQueueStats, resetBook };
