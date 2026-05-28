@@ -79,7 +79,7 @@ async function downloadCover(url, destDir) {
     const buf = Buffer.from(await res.arrayBuffer());
     const ext = url.match(/\.(jpg|jpeg|png)/i)?.[1] || 'jpg';
     const filepath = path.join(destDir, `cover.${ext}`);
-    fs.writeFileSync(filepath, buf);
+    await fs.promises.writeFile(filepath, buf);
     return filepath;
   } catch {
     return null;
