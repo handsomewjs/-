@@ -1,0 +1,14 @@
+{
+  "name": "xiaohongshu-book-bot",
+  "version": "1.0.0",
+  "description": "每日自动生成小红书书籍推荐帖子",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node schedule.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "sharp": "^0.33.0"
+  }
+}
