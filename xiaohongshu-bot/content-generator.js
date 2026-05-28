@@ -34,10 +34,14 @@ function parseClaudeResponse(text) {
     .replace(/```\s*/g, '')
     .trim();
 
-  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON found in response');
-
-  const parsed = JSON.parse(jsonMatch[0]);
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch (_first) {
+    const jsonMatch = cleaned.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response');
+    parsed = JSON.parse(jsonMatch[0]);
+  }
 
   if (!parsed.headline || !parsed.review) {
     throw new Error('Missing headline or review');
@@ -84,14 +88,17 @@ async function generateContent(bookData) {
         temperature: config.claudeTemperature,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: buildUserPrompt(bookData) }],
+        timeout: 30000,
       });
 
-      const raw = msg.content[0].text;
+      const textBlock = msg.content.find(b => b.type === 'text');
+      if (!textBlock) throw new Error('No text in response');
+      const raw = textBlock.text;
       const result = parseClaudeResponse(raw);
       return result;
     } catch (err) {
       console.error(`Content generation attempt ${attempt + 1} failed:`, err.message);
-      if (attempt === 1) return buildFallbackContent(bookData);
+      if (attempt === 1) break;
     }
   }
 
