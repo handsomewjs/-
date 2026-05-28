@@ -1,6 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function buildPreviewHtml(book, content, images, outputDir) {
   const imageRows = images.map((img, i) => {
     const relPath = path.relative(outputDir, img).replace(/\\/g, '/');
@@ -11,14 +20,17 @@ function buildPreviewHtml(book, content, images, outputDir) {
     </div>`;
   }).join('\n');
 
-  const tagsHtml = content.tags.map(t => `<span class="tag">${t}</span>`).join('\n');
+  const quotes = content.quotes || [];
+  const tags = content.tags || [];
+
+  const tagsHtml = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('\n');
 
   const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日荐书 - ${book.title}</title>
+<title>每日荐书 - ${escapeHtml(book.title)}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -74,18 +86,18 @@ function buildPreviewHtml(book, content, images, outputDir) {
 <body>
 <div class="container">
 
-  <h1>${book.title}</h1>
-  <p class="meta">${book.author} 著 · ${new Date().toLocaleDateString('zh-CN')} 发布</p>
+  <h1>${escapeHtml(book.title)}</h1>
+  <p class="meta">${escapeHtml(book.author)} 著 · ${new Date().toLocaleDateString('zh-CN')} 发布</p>
 
   <div class="text-section">
-    <div class="headline">${content.headline}</div>
+    <div class="headline">${escapeHtml(content.headline)}</div>
     <h2>📖 读后感</h2>
-    <div class="review">${content.review}</div>
+    <div class="review">${escapeHtml(content.review)}</div>
   </div>
 
   <div class="quotes-section">
     <h2>✒️ 名句摘抄</h2>
-    ${content.quotes.map(q => `<div class="quote-item">"${q}"</div>`).join('\n')}
+    ${quotes.map(q => `<div class="quote-item">"${escapeHtml(q)}"</div>`).join('\n')}
   </div>
 
   <div class="tags">${tagsHtml}</div>
