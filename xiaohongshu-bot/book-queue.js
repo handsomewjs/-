@@ -1,14 +1,25 @@
 const fs = require('fs');
-const path = require('path');
 const config = require('./config');
 
 function readBooks() {
-  const raw = fs.readFileSync(config.booksFile, 'utf-8');
-  return JSON.parse(raw);
+  try {
+    const raw = fs.readFileSync(config.booksFile, 'utf-8');
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return [];
+    }
+    console.error('readBooks error:', err.message);
+    return [];
+  }
 }
 
 function writeBooks(books) {
-  fs.writeFileSync(config.booksFile, JSON.stringify(books, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(config.booksFile, JSON.stringify(books, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('writeBooks error:', err.message);
+  }
 }
 
 function getNextBook() {
@@ -22,6 +33,11 @@ function getNextBook() {
 }
 
 function addBook(title, author) {
+  if (!title || !author || typeof title !== 'string' || typeof author !== 'string' ||
+      title.trim() === '' || author.trim() === '') {
+    console.error('addBook error: title and author must be non-empty strings');
+    return;
+  }
   const books = readBooks();
   const exists = books.some(b => b.title === title && b.author === author);
   if (!exists) {
