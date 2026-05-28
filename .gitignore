@@ -1,3 +1,8 @@
 node_modules/
 *.JPG
 *.jpg
+.browser-data/
+.browser-data2/
+.debug-screenshots/
+tessdata/
+test-results/
