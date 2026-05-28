@@ -10,7 +10,7 @@ const config = {
   booksFile: path.join(__dirname, 'books.json'),
   postsDir: path.join(__dirname, 'posts'),
 
-  claudeModel: 'claude-haiku-4-5',
+  claudeModel: 'claude-3-5-haiku-latest',
   claudeMaxTokens: 2000,
   claudeTemperature: 0.75,
 
