@@ -72,6 +72,14 @@ function buildFallbackContent(book) {
 }
 
 async function generateContent(bookData) {
+  // Diagnostic: check env var status without revealing the key
+  const envKey = process.env.DEEPSEEK_API_KEY;
+  console.log(`[诊断] process.env.DEEPSEEK_API_KEY 存在: ${!!envKey}`);
+  if (envKey) {
+    console.log(`[诊断] Key 长度: ${envKey.length}, 前7位: ${envKey.slice(0, 7)}...`);
+  }
+  console.log(`[诊断] config.deepseekApiKey 长度: ${config.deepseekApiKey.length}`);
+
   if (!config.deepseekApiKey) {
     console.warn('DEEPSEEK_API_KEY not set, using fallback content');
     return buildFallbackContent(bookData);
