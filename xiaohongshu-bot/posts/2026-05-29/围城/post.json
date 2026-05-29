@@ -1,0 +1,35 @@
+{
+  "date": "2026-05-29",
+  "book": {
+    "title": "围城",
+    "author": "钱钟书",
+    "coverUrl": "",
+    "description": "《围城》是一部值得细细品读的作品。",
+    "publisher": "未知",
+    "year": "未知",
+    "isbn": "",
+    "source": "fallback"
+  },
+  "content": {
+    "headline": "最近读完了《围城》，想和你聊聊",
+    "review": "《围城》是钱钟书的一部作品。这本书给了我很多启发和思考，值得反复阅读。每个人都能从中找到属于自己的感悟。无论你正处于人生的哪个阶段，这本书都能给你带来不一样的阅读体验。推荐给所有喜欢阅读的朋友。",
+    "quotes": [
+      "书中的智慧需要慢慢品味。",
+      "阅读是一场与自己的对话。",
+      "每一本好书都是一次心灵的旅行。"
+    ],
+    "tags": [
+      "#读书分享",
+      "#好书推荐",
+      "#围城"
+    ]
+  },
+  "images": [
+    "images/01-cover.png",
+    "images/02-quote.png",
+    "images/03-quote.png",
+    "images/04-quote.png",
+    "images/05-end.png"
+  ],
+  "generatedAt": "2026-05-29T13:38:10.397Z"
+}
