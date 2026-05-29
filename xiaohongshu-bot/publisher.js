@@ -40,7 +40,7 @@ async function publish() {
   console.log(`图片：${imageFiles.length} 张\n`);
 
   // Build the post body text
-  const postBody = `${postJson.content.review}`;
+  const postBody = `${postJson.content.tags.join(' ')}\n\n${postJson.content.review}`;
 
   // Copy body to clipboard using clip command
   try {
@@ -170,7 +170,7 @@ async function publish() {
   // === Auto-fill body ===
   console.log('尝试自动填写正文...');
   // Append tags to body so they appear as inline hashtags
-  const fullBody = postBody + '\n\n' + postJson.content.tags.join(' ');
+  const fullBody = postJson.content.tags.join(' ') + '\n\n' + postBody;
   try {
     const filled = await page.evaluate((body) => {
       const editables = document.querySelectorAll('[contenteditable="true"]');
