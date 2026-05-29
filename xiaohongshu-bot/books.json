@@ -54,6 +54,336 @@
   {
     "title": "局外人",
     "author": "阿尔贝·加缪",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "呼啸山庄",
+    "author": "艾米莉·勃朗特",
     "used": false
+  },
+  {
+    "title": "记一忘三二",
+    "author": "李娟",
+    "used": false
+  },
+  {
+    "title": "如果我们无法以光速前行",
+    "author": "金草叶",
+    "used": false
+  },
+  {
+    "title": "六个说谎的大学生",
+    "author": "浅仓秋成",
+    "used": false
+  },
+  {
+    "title": "复明症漫记",
+    "author": "若泽·萨拉马戈",
+    "used": false
+  },
+  {
+    "title": "00年代的想象力",
+    "author": "宇野常宽",
+    "used": false
+  },
+  {
+    "title": "失落的卫星",
+    "author": "刘子超",
+    "used": false
+  },
+  {
+    "title": "美丽新世界",
+    "author": "阿道司·赫胥黎",
+    "used": false
+  },
+  {
+    "title": "夜晚的潜水艇",
+    "author": "陈春成",
+    "used": false
+  },
+  {
+    "title": "九故事",
+    "author": "J.D.塞林格",
+    "used": false
+  },
+  {
+    "title": "索拉里斯星",
+    "author": "斯坦尼斯瓦夫·莱姆",
+    "used": false
+  },
+  {
+    "title": "绝叫",
+    "author": "叶真中显",
+    "used": false
+  },
+  {
+    "title": "老人与海",
+    "author": "厄内斯特·海明威",
+    "used": false
+  },
+  {
+    "title": "小径分叉的花园",
+    "author": "豪尔赫·路易斯·博尔赫斯",
+    "used": false
+  },
+  {
+    "title": "沙之书",
+    "author": "豪尔赫·路易斯·博尔赫斯",
+    "used": false
+  },
+  {
+    "title": "春月",
+    "author": "包柏漪",
+    "used": false
+  },
+  {
+    "title": "存在主义心理治疗",
+    "author": "欧文·亚隆",
+    "used": false
+  },
+  {
+    "title": "疯癫与文明",
+    "author": "米歇尔·福柯",
+    "used": false
+  },
+  {
+    "title": "未来学大会",
+    "author": "斯坦尼斯瓦夫·莱姆",
+    "used": false
+  },
+  {
+    "title": "流俗地",
+    "author": "黎紫书",
+    "used": false
+  },
+  {
+    "title": "始于极限",
+    "author": "上野千鹤子",
+    "used": false
+  },
+  {
+    "title": "营销管理",
+    "author": "菲利普·科特勒",
+    "used": false
+  },
+  {
+    "title": "纳瓦尔宝典",
+    "author": "埃里克·乔根森",
+    "used": false
+  },
+  {
+    "title": "高效能人士的七个习惯",
+    "author": "史蒂芬·柯维",
+    "used": false
+  },
+  {
+    "title": "和平戛然而止",
+    "author": "玛格丽特·麦克米伦",
+    "used": false
+  },
+  {
+    "title": "东京八平米",
+    "author": "吉井忍",
+    "used": false
+  },
+  {
+    "title": "赡养人类",
+    "author": "刘慈欣",
+    "used": false
+  },
+  {
+    "title": "野兽国",
+    "author": "莫里斯·桑达克",
+    "used": false
+  },
+  {
+    "title": "怪画谜案",
+    "author": "雨穴",
+    "used": false
+  },
+  {
+    "title": "画纱",
+    "author": "毛姆",
+    "used": false
+  },
+  {
+    "title": "论爱欲",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "来世",
+    "author": "阿卜杜勒拉扎克·古尔纳",
+    "used": false
+  },
+  {
+    "title": "叙事本能",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "创作与爱",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "大众化的女性主义指南",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "百年家书",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "四季书店",
+    "author": "",
+    "used": false
+  },
+  {
+    "title": "平凡的世界",
+    "author": "路遥",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "白鹿原",
+    "author": "陈忠实",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "挪威的森林",
+    "author": "村上春树",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "白夜行",
+    "author": "东野圭吾",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "嫌疑人X的献身",
+    "author": "东野圭吾",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "恶意",
+    "author": "东野圭吾",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "解忧杂货店",
+    "author": "东野圭吾",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "无名之町",
+    "author": "东野圭吾",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "秋园",
+    "author": "杨本芬",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "分成两半的子爵",
+    "author": "伊塔洛·卡尔维诺",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "西线无战事",
+    "author": "埃里希·玛丽亚·雷马克",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "长安的荔枝",
+    "author": "马伯庸",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "人生",
+    "author": "路遥",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "青之炎",
+    "author": "贵志祐介",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "大师和玛格丽特",
+    "author": "米哈伊尔·布尔加科夫",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "蛙",
+    "author": "莫言",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "阿甘正传",
+    "author": "温斯顿·格鲁姆",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "下沉年代",
+    "author": "乔治·帕克",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "人间失格",
+    "author": "太宰治",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "巨人的陨落",
+    "author": "肯·福莱特",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "霍乱时期的爱情",
+    "author": "加西亚·马尔克斯",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "长日将尽",
+    "author": "石黑一雄",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "被讨厌的勇气",
+    "author": "岸见一郎",
+    "used": true,
+    "usedDate": "2026-05-29"
+  },
+  {
+    "title": "苏菲的世界",
+    "author": "乔斯坦·贾德",
+    "used": true,
+    "usedDate": "2026-05-29"
   }
 ]
