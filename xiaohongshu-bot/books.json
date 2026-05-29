@@ -2,7 +2,8 @@
   {
     "title": "百年孤独",
     "author": "加西亚·马尔克斯",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-29"
   },
   {
     "title": "围城",
