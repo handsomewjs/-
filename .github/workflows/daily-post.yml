@@ -63,6 +63,7 @@ jobs:
           git config user.email "bot@xiaohongshu.book"
           git add xiaohongshu-bot/posts/ xiaohongshu-bot/books.json
           git diff --cached --quiet || git commit -m "📚 今日荐书 — $(date +%Y-%m-%d)"
+          git pull --rebase origin master
           git push origin master
 
       - name: Upload artifacts
