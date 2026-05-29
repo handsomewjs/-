@@ -32,7 +32,8 @@
   {
     "title": "月亮与六便士",
     "author": "毛姆",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-29"
   },
   {
     "title": "三体",
