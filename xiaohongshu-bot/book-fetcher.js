@@ -4,12 +4,20 @@ const config = require('./config');
 
 async function fetchFromGoogleBooks(title, author) {
   const query = author ? `${title}+inauthor:${author}` : title;
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=zh&maxResults=3&key=${config.googleBooksApiKey}`;
+  let url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=zh&maxResults=3`;
+  // Only append key if configured — empty key breaks the request
+  if (config.googleBooksApiKey) {
+    url += `&key=${config.googleBooksApiKey}`;
+  }
 
+  console.log(`  [GoogleBooks] 查询: ${query}`);
   const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!res.ok) throw new Error(`Google Books API error: ${res.status}`);
   const data = await res.json();
-  if (!data.items || data.items.length === 0) return null;
+  if (!data.items || data.items.length === 0) {
+    console.log('  [GoogleBooks] 无结果');
+    return null;
+  }
 
   const volume = data.items[0].volumeInfo;
   return {
@@ -32,7 +40,8 @@ async function fetchFromOpenLibrary(title, author) {
   const query = author ? `${title} ${author}` : title;
   const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=3`;
 
-  const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  console.log(`  [OpenLibrary] 查询: ${query}`);
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`OpenLibrary API error: ${res.status}`);
   const data = await res.json();
   if (!data.docs || data.docs.length === 0) return null;
@@ -54,12 +63,54 @@ async function fetchFromOpenLibrary(title, author) {
   };
 }
 
+async function fetchFromDouban(title, author) {
+  const query = author ? `${title} ${author}` : title;
+  const url = `https://www.douban.com/search?q=${encodeURIComponent(query)}&cat=1001`;
+
+  console.log(`  [Douban] 搜索: ${query}`);
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Extract book URL from search results
+    const bookMatch = html.match(/https:\/\/book\.douban\.com\/subject\/(\d+)\//);
+    if (!bookMatch) return null;
+
+    const subjectId = bookMatch[1];
+    // Cover image is often embedded in search results
+    const imgMatch = html.match(/src="(https:\/\/img\d+\.doubanio\.com\/view\/subject\/[lm]\/public\/[^"]+)"/);
+    const coverUrl = imgMatch ? imgMatch[1].replace('/m/', '/l/') : '';
+
+    // Extract description snippet
+    const descMatch = html.match(/<span class="subject-cast">([^<]+)<\/span>/);
+    const descSnippet = descMatch ? descMatch[1].trim() : '';
+
+    return {
+      title,
+      author: author || '未知',
+      coverUrl,
+      description: descSnippet || '',
+      publisher: '',
+      year: '',
+      isbn: subjectId,
+      source: 'douban',
+    };
+  } catch (err) {
+    console.log(`  [Douban] 失败: ${err.message}`);
+    return null;
+  }
+}
+
 function buildFallbackData(book) {
   return {
     title: book.title,
     author: book.author || '未知',
     coverUrl: '',
-    description: `《${book.title}》是一部值得细细品读的作品。`,
+    description: '',
     publisher: '未知',
     year: '未知',
     isbn: '',
@@ -90,11 +141,13 @@ async function fetchBookData(book) {
   const { title, author } = book;
 
   let result = null;
-  if (config.googleBooksApiKey) {
-    try { result = await fetchFromGoogleBooks(title, author); } catch {}
+  // Try each source in order
+  try { result = await fetchFromGoogleBooks(title, author); } catch (err) { console.log(`  [GoogleBooks] 错误: ${err.message}`); }
+  if (!result || !result.coverUrl) {
+    try { result = await fetchFromOpenLibrary(title, author); } catch (err) { console.log(`  [OpenLibrary] 错误: ${err.message}`); }
   }
-  if (!result) {
-    try { result = await fetchFromOpenLibrary(title, author); } catch {}
+  if (!result || !result.coverUrl) {
+    try { result = await fetchFromDouban(title, author); } catch (err) { console.log(`  [Douban] 错误: ${err.message}`); }
   }
   if (!result) {
     result = buildFallbackData(book);

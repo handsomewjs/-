@@ -37,37 +37,57 @@ function buildCoverSvg(book, content, coverPath) {
   const escapedTitle = escapeXml(book.title);
   const escapedAuthor = escapeXml(book.author);
   const quote = content.quotes ? content.quotes[0] : '';
-  const displayQuote = quote.length > 30 ? quote.slice(0, 30) + '...' : quote;
+  const displayQuote = quote.length > 40 ? quote.slice(0, 40) + '...' : quote;
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${p.bg}"/>
-      <stop offset="100%" stop-color="${p.light}"/>
-    </linearGradient>
-  </defs>
-  <rect width="${W}" height="${H}" fill="url(#grad)"/>
+  // Title sizing: longer titles use smaller font
+  const titleLen = book.title.length;
+  const titleFontSize = titleLen > 6 ? 52 : titleLen > 4 ? 64 : 80;
+  const titleLines = wrapText(book.title, 8);
+  const titleY = H * 0.32;
+  const titleBlockHeight = titleLines.length * (titleFontSize + 10);
 
-  <!-- Cover image placeholder -->
-  <rect x="240" y="160" width="600" height="840" rx="12" fill="#2a2a3a" opacity="0.5"/>
-  ${coverPath
-    ? `<image href="file://${path.resolve(coverPath).replace(/\\/g, '/')}" x="260" y="180" width="560" height="800" preserveAspectRatio="xMidYMid slice"/>`
-    : `<text x="540" y="600" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="64" fill="#555">📚</text>`}
+  const titleEls = titleLines.map((line, i) =>
+    '<text x="540" y="' + (titleY + i * (titleFontSize + 16)) + '" text-anchor="middle" font-family="\'Noto Serif CJK SC\', serif" font-size="' + titleFontSize + '" font-weight="bold" fill="' + p.text + '">' + escapeXml(line) + '</text>'
+  ).join('\n');
 
-  <!-- Book title -->
-  <text x="540" y="1100" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="48" font-weight="bold" fill="${p.text}">${escapedTitle}</text>
+  const coverExists = coverPath && fs.existsSync(coverPath);
 
-  <!-- Author -->
-  <text x="540" y="1170" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="32" fill="${p.accent}">${escapedAuthor} 著</text>
-
-  <!-- Quote preview -->
-  <text x="540" y="1260" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.6">"${escapeXml(displayQuote)}"</text>
-
-  <!-- Brand badge -->
-  <rect x="340" y="1330" width="400" height="50" rx="25" fill="${p.accent}" opacity="0.15"/>
-  <text x="540" y="1363" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="22" fill="${p.accent}">每日荐书 · 关注我每天一本好书</text>
-</svg>`;
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">\n' +
+'  <defs>\n' +
+'    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">\n' +
+'      <stop offset="0%" stop-color="' + p.bg + '"/>\n' +
+'      <stop offset="100%" stop-color="' + p.light + '"/>\n' +
+'    </linearGradient>\n' +
+'    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">\n' +
+'      <stop offset="0%" stop-color="' + p.accent + '"/>\n' +
+'      <stop offset="100%" stop-color="' + p.accent + '" stop-opacity="0.3"/>\n' +
+'    </linearGradient>\n' +
+'  </defs>\n' +
+'  <rect width="' + W + '" height="' + H + '" fill="url(#bgGrad)"/>\n' +
+'\n' +
+(coverExists
+  ? '  <image href="file://' + path.resolve(coverPath).replace(/\\/g, '/') + '" x="0" y="0" width="' + W + '" height="' + H + '" preserveAspectRatio="xMidYMid slice"/>\n' +
+    '  <rect width="' + W + '" height="' + H + '" fill="#000" opacity="0.5"/>\n' +
+    '  <text x="540" y="' + titleY + '" text-anchor="middle" font-family="\'Noto Serif CJK SC\', serif" font-size="' + titleFontSize + '" font-weight="bold" fill="#fff">' + escapedTitle + '</text>\n' +
+    '  <text x="540" y="' + (titleY + titleFontSize + 30) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="28" fill="#ccc">' + escapedAuthor + ' 著</text>\n'
+  : '  <!-- Text-only cover design -->\n' +
+    '  <rect x="140" y="' + (titleY - 150) + '" width="800" height="5" fill="url(#accentGrad)" rx="2"/>\n' +
+    '  <rect x="70" y="' + (titleY - 130) + '" width="940" height="' + (titleBlockHeight + 160) + '" rx="16" fill="' + p.bg + '" opacity="0.35"/>\n' +
+    '  ' + titleEls + '\n' +
+    '  <line x1="240" y1="' + (titleY + titleBlockHeight + 20) + '" x2="840" y2="' + (titleY + titleBlockHeight + 20) + '" stroke="' + p.accent + '" stroke-width="2" opacity="0.6"/>\n' +
+    '  <text x="540" y="' + (titleY + titleBlockHeight + 60) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="28" fill="' + p.text + '" opacity="0.8">' + escapedAuthor + ' 著</text>\n'
+) +
+'\n' +
+'  <!-- Divider -->\n' +
+'  <rect x="240" y="1220" width="600" height="1" fill="' + p.accent + '" opacity="0.2"/>\n' +
+'  <!-- Quote preview -->\n' +
+'  <text x="540" y="1270" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="24" fill="' + p.text + '" opacity="0.45">"' + escapeXml(displayQuote) + '"</text>\n' +
+'\n' +
+'  <!-- Brand badge -->\n' +
+'  <rect x="340" y="1320" width="400" height="48" rx="24" fill="' + p.accent + '" opacity="0.12"/>\n' +
+'  <text x="540" y="1352" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="20" fill="' + p.accent + '">每日荐书 · 关注我每天一本好书</text>\n' +
+'</svg>';
 }
 
 // SVG for quote card: single quote with elegant typography
@@ -77,30 +97,26 @@ function buildQuoteSvg(quote, index, total) {
   const yStart = H / 2 - (qLines.length - 1) * 35;
 
   const quoteTextEls = qLines.map((line, i) =>
-    `<text x="540" y="${yStart + i * 70}" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="42" font-weight="bold" fill="${p.text}">${escapeXml(line)}</text>`
+    '<text x="540" y="' + (yStart + i * 70) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="42" font-weight="bold" fill="' + p.text + '">' + escapeXml(line) + '</text>'
   ).join('\n');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${p.bg}"/>
-      <stop offset="100%" stop-color="${p.light}"/>
-    </linearGradient>
-  </defs>
-  <rect width="${W}" height="${H}" fill="url(#grad)"/>
-
-  <!-- Decorative top line -->
-  <line x1="340" y1="${yStart - 80}" x2="740" y2="${yStart - 80}" stroke="${p.accent}" stroke-width="3" opacity="0.6"/>
-
-  <!-- Opening quote mark -->
-  <text x="540" y="${yStart - 120}" text-anchor="middle" font-family="'Noto Serif CJK SC', serif" font-size="100" fill="${p.accent}" opacity="0.25">"</text>
-
-  ${quoteTextEls}
-
-  <!-- Card number -->
-  <text x="540" y="1350" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="20" fill="${p.text}" opacity="0.25">${index} / ${total}</text>
-</svg>`;
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">\n' +
+'  <defs>\n' +
+'    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">\n' +
+'      <stop offset="0%" stop-color="' + p.bg + '"/>\n' +
+'      <stop offset="100%" stop-color="' + p.light + '"/>\n' +
+'    </linearGradient>\n' +
+'  </defs>\n' +
+'  <rect width="' + W + '" height="' + H + '" fill="url(#grad)"/>\n' +
+'\n' +
+'  <line x1="340" y1="' + (yStart - 80) + '" x2="740" y2="' + (yStart - 80) + '" stroke="' + p.accent + '" stroke-width="3" opacity="0.6"/>\n' +
+'  <text x="540" y="' + (yStart - 120) + '" text-anchor="middle" font-family="\'Noto Serif CJK SC\', serif" font-size="100" fill="' + p.accent + '" opacity="0.25">"</text>\n' +
+'\n' +
+'  ' + quoteTextEls + '\n' +
+'\n' +
+'  <text x="540" y="1350" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="20" fill="' + p.text + '" opacity="0.25">' + index + ' / ' + total + '</text>\n' +
+'</svg>';
 }
 
 // SVG for follow/end card
@@ -108,26 +124,26 @@ function buildFollowSvg(bookTitle) {
   const p = pickPalette();
   const escapedTitle = escapeXml(bookTitle);
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${p.bg}"/>
-      <stop offset="100%" stop-color="${p.light}"/>
-    </linearGradient>
-  </defs>
-  <rect width="${W}" height="${H}" fill="url(#grad)"/>
-
-  <text x="540" y="520" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="72" fill="${p.accent}">📖</text>
-  <text x="540" y="620" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="36" font-weight="bold" fill="${p.text}">今天的好书就推荐到这里</text>
-  <text x="540" y="690" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.7">如果你也读过《${escapedTitle}》</text>
-  <text x="540" y="740" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="26" fill="${p.text}" opacity="0.7">欢迎在评论区聊聊你的感受</text>
-
-  <rect x="270" y="840" width="540" height="70" rx="35" fill="${p.accent}" opacity="0.12"/>
-  <text x="540" y="885" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="36" font-weight="bold" fill="${p.accent}">关注我 · 每天一本好书</text>
-
-  <text x="540" y="960" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="22" fill="${p.text}" opacity="0.3">每晚 8 点更新</text>
-</svg>`;
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">\n' +
+'  <defs>\n' +
+'    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">\n' +
+'      <stop offset="0%" stop-color="' + p.bg + '"/>\n' +
+'      <stop offset="100%" stop-color="' + p.light + '"/>\n' +
+'    </linearGradient>\n' +
+'  </defs>\n' +
+'  <rect width="' + W + '" height="' + H + '" fill="url(#grad)"/>\n' +
+'\n' +
+'  <text x="540" y="520" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="72" fill="' + p.accent + '">📖</text>\n' +
+'  <text x="540" y="620" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="36" font-weight="bold" fill="' + p.text + '">今天的好书就推荐到这里</text>\n' +
+'  <text x="540" y="690" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="26" fill="' + p.text + '" opacity="0.7">如果你也读过《' + escapedTitle + '》</text>\n' +
+'  <text x="540" y="740" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="26" fill="' + p.text + '" opacity="0.7">欢迎在评论区聊聊你的感受</text>\n' +
+'\n' +
+'  <rect x="270" y="840" width="540" height="70" rx="35" fill="' + p.accent + '" opacity="0.12"/>\n' +
+'  <text x="540" y="885" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="36" font-weight="bold" fill="' + p.accent + '">关注我 · 每天一本好书</text>\n' +
+'\n' +
+'  <text x="540" y="960" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="22" fill="' + p.text + '" opacity="0.3">每晚 8 点更新</text>\n' +
+'</svg>';
 }
 
 async function renderSvgToPng(svgContent, outputPath) {
@@ -159,11 +175,11 @@ async function generateImages(bookData, content, coverPath, outputDir) {
     try {
       const num = String(i + 2).padStart(2, '0');
       const quoteSvg = buildQuoteSvg(quoteArr[i], i + 2, totalCards);
-      const quoteOut = path.join(outputDir, `${num}-quote.png`);
+      const quoteOut = path.join(outputDir, num + '-quote.png');
       await renderSvgToPng(quoteSvg, quoteOut);
       images.push(quoteOut);
     } catch (err) {
-      console.error(`Failed to generate quote card ${i + 1}:`, err.message);
+      console.error('Failed to generate quote card ' + (i + 1) + ':', err.message);
     }
   }
 
@@ -171,7 +187,7 @@ async function generateImages(bookData, content, coverPath, outputDir) {
   try {
     const num = String(quoteCount + 2).padStart(2, '0');
     const followSvg = buildFollowSvg(bookData.title);
-    const followOut = path.join(outputDir, `${num}-end.png`);
+    const followOut = path.join(outputDir, num + '-end.png');
     await renderSvgToPng(followSvg, followOut);
     images.push(followOut);
   } catch (err) {
