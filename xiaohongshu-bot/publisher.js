@@ -269,29 +269,66 @@ async function publish() {
   });
 
   try {
+    // First, dismiss any modal dialogs that might block the publish button
+    // e.g. "暂无群聊" popup from accidentally clicking group-chat button
+    await page.evaluate(() => {
+      // Close any visible modal/dialog/popup
+      const closeSelectors = [
+        '[class*="close"]', '[class*="Close"]',
+        '[class*="cancel"]', '[class*="Cancel"]',
+        '[class*="dismiss"]', '[class*="Dismiss"]',
+        '.modal-close', '.dialog-close', '.popup-close',
+        'button:has-text("确定")', 'button:has-text("知道了")',
+        'button:has-text("取消")',
+      ];
+      for (const sel of closeSelectors) {
+        try {
+          const el = document.querySelector(sel);
+          if (el && el.offsetParent !== null) {
+            el.click();
+            console.log('已关闭弹窗');
+            return;
+          }
+        } catch {}
+      }
+      // Fallback: click overlay/mask
+      const overlays = document.querySelectorAll('[class*="mask"], [class*="overlay"], [class*="backdrop"]');
+      for (const ov of overlays) {
+        if (ov.offsetParent !== null) {
+          ov.click();
+          return;
+        }
+      }
+    });
+    await sleep(800);
+
     // Find and click the actual "发布" button within xhs-publish-btn
-    // The component has multiple buttons — we target by visible text
     const clicked = await page.evaluate(() => {
       const host = document.querySelector('xhs-publish-btn');
       if (!host) return 'no-host';
       const shadow = host.shadowRoot;
       const root = shadow || host;
 
-      // Strategy 1: find button whose text is exactly "发布"
-      const buttons = root.querySelectorAll('button, a, div[role="button"], span[role="button"]');
-      for (const btn of buttons) {
-        if (btn.textContent.trim() === '发布') {
-          btn.click();
-          return 'clicked';
+      // Strategy: find deepest element whose sole text is exactly "发布"
+      const all = root.querySelectorAll('*');
+      let best = null;
+      for (const el of all) {
+        const text = el.textContent.trim();
+        if (text === '发布' && el.children.length === 0) {
+          best = el;
+          break; // leaf node wins
         }
       }
+      if (best) {
+        best.click();
+        return 'clicked';
+      }
 
-      // Strategy 2: find any element with exact text "发布" inside the host
-      const all = root.querySelectorAll('*');
+      // Fallback: broader search
       for (const el of all) {
-        if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 && el.textContent.trim() === '发布') {
+        if (el.textContent.trim() === '发布') {
           el.click();
-          return 'clicked-deep';
+          return 'clicked-fallback';
         }
       }
 
