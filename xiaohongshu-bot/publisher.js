@@ -269,32 +269,45 @@ async function publish() {
   });
 
   try {
-    const btnCount = await page.locator('xhs-publish-btn').count();
-    console.log(`  找到 ${btnCount} 个 xhs-publish-btn`);
+    // Find and click the actual "发布" button within xhs-publish-btn
+    // The component has multiple buttons — we target by visible text
+    const clicked = await page.evaluate(() => {
+      const host = document.querySelector('xhs-publish-btn');
+      if (!host) return 'no-host';
+      const shadow = host.shadowRoot;
+      const root = shadow || host;
 
-    if (btnCount > 0) {
-      const publishEl = page.locator('xhs-publish-btn');
-      await publishEl.scrollIntoViewIfNeeded();
-      await sleep(500);
-      const box = await publishEl.boundingBox();
-
-      if (box) {
-        // Click at 85% width (right side = publish button, left side = save draft)
-        await page.mouse.click(box.x + box.width * 0.85, box.y + box.height / 2);
-        console.log('✓ 已点击发布按钮');
-      }
-      await sleep(4000);
-
-      if (publishApiCalled) {
-        console.log('✓ 发布 API 已调用成功！');
-      } else {
-        console.log('（发布请求可能未触发，请检查截图确认）');
+      // Strategy 1: find button whose text is exactly "发布"
+      const buttons = root.querySelectorAll('button, a, div[role="button"], span[role="button"]');
+      for (const btn of buttons) {
+        if (btn.textContent.trim() === '发布') {
+          btn.click();
+          return 'clicked';
+        }
       }
 
-      await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'published.png') });
+      // Strategy 2: find any element with exact text "发布" inside the host
+      const all = root.querySelectorAll('*');
+      for (const el of all) {
+        if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 && el.textContent.trim() === '发布') {
+          el.click();
+          return 'clicked-deep';
+        }
+      }
+
+      return 'not-found';
+    });
+    console.log(`  发布按钮: ${clicked}`);
+
+    await sleep(4000);
+
+    if (publishApiCalled) {
+      console.log('✓ 发布 API 已调用成功！');
     } else {
-      console.log('未找到 xhs-publish-btn 元素');
+      console.log('（发布请求可能未触发，请检查截图确认）');
     }
+
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'published.png') });
   } catch (err) {
     console.log(`发布点击失败: ${err.message}`);
   }
