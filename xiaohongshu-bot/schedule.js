@@ -16,13 +16,21 @@ async function main() {
   console.log('=== 小红书每日荐书机器人 ===');
   console.log(`开始时间：${new Date().toISOString()}\n`);
 
-  // 1. Get next book from queue
-  const book = getNextBook();
-  if (!book) {
-    console.error('书单已空！请编辑 books.json 添加新书后重新运行。');
-    process.exit(1);
+  // 1. Get book: manual override or next from queue
+  const manualTitle = process.env.BOOK_TITLE;
+  let book;
+  if (manualTitle && manualTitle.trim()) {
+    const { addBook } = require('./book-queue');
+    book = { title: manualTitle.trim(), author: '', source: 'manual' };
+    console.log(`[1/5] 手动指定：《${book.title}》`);
+  } else {
+    book = getNextBook();
+    if (!book) {
+      console.error('书单已空！请编辑 books.json 添加新书后重新运行。');
+      process.exit(1);
+    }
+    console.log(`[1/5] 选定书籍：《${book.title}》- ${book.author}`);
   }
-  console.log(`[1/5] 选定书籍：《${book.title}》- ${book.author}`);
 
   // 2. Fetch book metadata
   console.log('[2/5] 获取图书数据...');
