@@ -38,7 +38,8 @@
   {
     "title": "三体",
     "author": "刘慈欣",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-29"
   },
   {
     "title": "红楼梦",
