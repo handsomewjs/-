@@ -15,8 +15,16 @@ const PALETTES = [
   { bg: '#1b1b2f', accent: '#bbe1fa', text: '#e4e4e4', light: '#162447' },
 ];
 
-function pickPalette() {
-  return PALETTES[Math.floor(Math.random() * PALETTES.length)];
+function pickPalette(style) {
+  // Map mood style to palette range
+  const zones = {
+    dark: [0, 1, 2, 5],
+    light: [3],
+    warm: [3, 4],
+    cold: [1, 2, 5],
+  };
+  const pool = (style && zones[style]) ? zones[style] : [0, 1, 2, 3, 4, 5];
+  return PALETTES[pool[Math.floor(Math.random() * pool.length)]];
 }
 
 function wrapText(text, maxChars) {
@@ -33,9 +41,12 @@ function escapeXml(str) {
 
 // SVG for cover card: book cover + title + author + quote
 function buildCoverSvg(book, content, coverPath) {
-  const p = pickPalette();
+  const style = content.coverStyle || 'dark';
+  const p = pickPalette(style);
+  const mood = content.coverMood || '';
   const escapedTitle = escapeXml(book.title);
   const escapedAuthor = escapeXml(book.author);
+  const escapedMood = mood ? escapeXml(mood) : '';
   const quote = content.quotes ? content.quotes[0] : '';
   const displayQuote = quote.length > 40 ? quote.slice(0, 40) + '...' : quote;
 
@@ -73,10 +84,11 @@ function buildCoverSvg(book, content, coverPath) {
     '  <text x="540" y="' + (titleY + titleFontSize + 30) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="28" fill="#ccc">' + escapedAuthor + ' 著</text>\n'
   : '  <!-- Text-only cover design -->\n' +
     '  <rect x="140" y="' + (titleY - 150) + '" width="800" height="5" fill="url(#accentGrad)" rx="2"/>\n' +
-    '  <rect x="70" y="' + (titleY - 130) + '" width="940" height="' + (titleBlockHeight + 160) + '" rx="16" fill="' + p.bg + '" opacity="0.35"/>\n' +
+    '  <rect x="70" y="' + (titleY - 130) + '" width="940" height="' + (titleBlockHeight + 160 + (mood ? 64 : 0)) + '" rx="16" fill="' + p.bg + '" opacity="0.35"/>\n' +
     '  ' + titleEls + '\n' +
-    '  <line x1="240" y1="' + (titleY + titleBlockHeight + 20) + '" x2="840" y2="' + (titleY + titleBlockHeight + 20) + '" stroke="' + p.accent + '" stroke-width="2" opacity="0.6"/>\n' +
-    '  <text x="540" y="' + (titleY + titleBlockHeight + 60) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="28" fill="' + p.text + '" opacity="0.8">' + escapedAuthor + ' 著</text>\n'
+    (mood ? '  <text x="540" y="' + (titleY + titleBlockHeight + 10) + '" text-anchor="middle" font-family="\'Noto Serif CJK SC\', serif" font-size="28" fill="' + p.accent + '" opacity="0.85">' + escapedMood + '</text>\n' : '') +
+    '  <line x1="240" y1="' + (titleY + titleBlockHeight + (mood ? 44 : 20)) + '" x2="840" y2="' + (titleY + titleBlockHeight + (mood ? 44 : 20)) + '" stroke="' + p.accent + '" stroke-width="2" opacity="0.6"/>\n' +
+    '  <text x="540" y="' + (titleY + titleBlockHeight + (mood ? 84 : 60)) + '" text-anchor="middle" font-family="\'Noto Sans CJK SC\', sans-serif" font-size="28" fill="' + p.text + '" opacity="0.8">' + escapedAuthor + ' 著</text>\n'
 ) +
 '\n' +
 '  <!-- Divider -->\n' +

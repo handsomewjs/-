@@ -8,7 +8,9 @@ const SYSTEM_PROMPT = `你是一个小红读书博主，经营着一个"每日�
   "headline": "抓眼球的标题",
   "review": "正文内容",
   "quotes": ["名句1", "名句2", "名句3", "名句4", "名句5"],
-  "tags": ["#书名", "#读书分享", "#好书推荐", "#类型标签", "#主题/情绪标签"]
+  "tags": ["#书名", "#读书分享", "#好书推荐", "#类型标签", "#主题/情绪标签"],
+  "coverMood": "一句意境短语",
+  "coverStyle": "dark或light或warm或cold"
 }
 
 严格规则：
@@ -19,9 +21,11 @@ const SYSTEM_PROMPT = `你是一个小红读书博主，经营着一个"每日�
    - 用口语，像深夜发微信跟朋友聊天。说人话，不要说"这本书告诉我们""值得反复阅读"这种AI味句子
    - 可以用生活中的场景引入，比如"昨晚失眠翻开这本...""地铁上读到这段差点坐过站..."
 3. tags 要有5-6个，覆盖不同维度：#书名 #类型（科幻/文学/哲学等） #情绪（治愈/震撼/虐心等） #作者名 #主题关键词 #人群（打工人/学生党等）
-4. quotes 必须来自原书真实内容，不确定的宁可不写，至少3条
-5. 全部中文
-6. 只输出 JSON，不要任何其他内容`;
+4. coverMood 一句6-12字的意境描述，像海报上的宣传语，例如：「宇宙无声，人心汹涌」「所有大人最初都是孩子」「自由是唯一的枷锁」
+5. coverStyle 从四个词中选一个：dark（深邃压抑）、light（明亮温暖）、warm（怀旧温情）、cold（冷静克制）
+6. quotes 必须来自原书真实内容，不确定的宁可不写，至少3条
+7. 全部中文
+8. 只输出 JSON，不要任何其他内容`;
 
 function buildUserPrompt(book) {
   return `请为以下书籍生成小红书荐书帖子内容：
@@ -56,6 +60,12 @@ function parseAiResponse(text) {
   if (!Array.isArray(parsed.tags) || parsed.tags.length < 2) {
     parsed.tags = ['#读书分享', '#好书推荐'];
   }
+  if (!parsed.coverMood || typeof parsed.coverMood !== 'string') {
+    parsed.coverMood = '';
+  }
+  if (!['dark', 'light', 'warm', 'cold'].includes(parsed.coverStyle)) {
+    parsed.coverStyle = 'dark';
+  }
 
   parsed.review = parsed.review.slice(0, 500);
   parsed.quotes = parsed.quotes.slice(0, config.maxQuotes);
@@ -73,6 +83,8 @@ function buildFallbackContent(book) {
       '每一本好书都是一次心灵的旅行。',
     ],
     tags: ['#读书分享', '#好书推荐', `#${book.title}`],
+    coverMood: '翻开一本书，遇见另一个世界',
+    coverStyle: 'warm',
   };
 }
 
