@@ -33,6 +33,22 @@ jobs:
         working-directory: xiaohongshu-bot
         run: npm ci
 
+      - name: Check secrets
+        run: |
+          if [ -n "$DEEPSEEK_API_KEY" ]; then
+            echo "DEEPSEEK_API_KEY: SET (length=${#DEEPSEEK_API_KEY})"
+          else
+            echo "DEEPSEEK_API_KEY: NOT SET or EMPTY"
+          fi
+          if [ -n "$GOOGLE_BOOKS_API_KEY" ]; then
+            echo "GOOGLE_BOOKS_API_KEY: SET (length=${#GOOGLE_BOOKS_API_KEY})"
+          else
+            echo "GOOGLE_BOOKS_API_KEY: NOT SET or EMPTY"
+          fi
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
+
       - name: Generate daily post
         working-directory: xiaohongshu-bot
         env:
