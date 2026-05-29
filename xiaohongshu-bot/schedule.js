@@ -20,8 +20,13 @@ async function main() {
   const manualTitle = process.env.BOOK_TITLE;
   let book;
   if (manualTitle && manualTitle.trim()) {
-    const { addBook } = require('./book-queue');
-    book = { title: manualTitle.trim(), author: '', source: 'manual' };
+    const { getNextBook, addBook } = require('./book-queue');
+    // Try to find the book in queue first, fall back to manual entry
+    book = getNextBook(manualTitle.trim());
+    if (!book) {
+      addBook(manualTitle.trim(), '');
+      book = { title: manualTitle.trim(), author: '', source: 'manual' };
+    }
     console.log(`[1/5] 手动指定：《${book.title}》`);
   } else {
     book = getNextBook();

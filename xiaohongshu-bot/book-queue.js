@@ -22,9 +22,11 @@ function writeBooks(books) {
   }
 }
 
-function getNextBook() {
+function getNextBook(specificTitle) {
   const books = readBooks();
-  const idx = books.findIndex(b => !b.used);
+  const idx = specificTitle
+    ? books.findIndex(b => b.title === specificTitle && !b.used)
+    : books.findIndex(b => !b.used);
   if (idx === -1) return null;
   books[idx].used = true;
   books[idx].usedDate = new Date().toISOString().split('T')[0];
@@ -33,10 +35,11 @@ function getNextBook() {
 }
 
 function addBook(title, author) {
-  if (!title || !author || typeof title !== 'string' || typeof author !== 'string' ||
-      title.trim() === '' || author.trim() === '') {
-    console.error('addBook error: title and author must be non-empty strings');
+  if (!title || typeof title !== 'string' || title.trim() === '') {
+    console.error('addBook error: title must be a non-empty string');
     return;
+  }
+  author = author || '';
   }
   const books = readBooks();
   const exists = books.some(b => b.title === title && b.author === author);
