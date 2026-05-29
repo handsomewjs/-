@@ -26,7 +26,8 @@
   {
     "title": "小王子",
     "author": "安托万·德·圣埃克苏佩里",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-29"
   },
   {
     "title": "月亮与六便士",
