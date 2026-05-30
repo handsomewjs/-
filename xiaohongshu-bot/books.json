@@ -50,7 +50,8 @@
   {
     "title": "1984",
     "author": "乔治·奥威尔",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-30"
   },
   {
     "title": "局外人",
