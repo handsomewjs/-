@@ -65,35 +65,103 @@ async function fetchFromOpenLibrary(title, author) {
 
 async function fetchFromDouban(title, author) {
   const query = author ? `${title} ${author}` : title;
-  const url = `https://www.douban.com/search?q=${encodeURIComponent(query)}&cat=1001`;
+  const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
 
   console.log(`  [Douban] 搜索: ${query}`);
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(8000),
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-    });
-    if (!res.ok) return null;
-    const html = await res.text();
+    // Step 1: Search for the book
+    const searchUrl = `https://www.douban.com/search?q=${encodeURIComponent(query)}&cat=1001`;
+    const searchRes = await fetch(searchUrl, { signal: AbortSignal.timeout(10000), headers });
+    if (!searchRes.ok) {
+      console.log(`  [Douban] 搜索返回 ${searchRes.status}`);
+      return null;
+    }
+    const searchHtml = await searchRes.text();
 
-    // Extract book URL from search results
-    const bookMatch = html.match(/https:\/\/book\.douban\.com\/subject\/(\d+)\//);
-    if (!bookMatch) return null;
+    // Try multiple regex patterns to find the subject ID
+    let subjectId = null;
+    let coverUrl = '';
 
-    const subjectId = bookMatch[1];
-    // Cover image is often embedded in search results
-    const imgMatch = html.match(/src="(https:\/\/img\d+\.doubanio\.com\/view\/subject\/[lm]\/public\/[^"]+)"/);
-    const coverUrl = imgMatch ? imgMatch[1].replace('/m/', '/l/') : '';
+    const idPatterns = [
+      /https:\/\/book\.douban\.com\/subject\/(\d+)\//,
+      /\/subject\/(\d+)\//,
+      /sid:\s*(\d+)/,
+    ];
+    for (const pat of idPatterns) {
+      const m = searchHtml.match(pat);
+      if (m) { subjectId = m[1]; break; }
+    }
 
-    // Extract description snippet
-    const descMatch = html.match(/<span class="subject-cast">([^<]+)<\/span>/);
-    const descSnippet = descMatch ? descMatch[1].trim() : '';
+    if (!subjectId) {
+      console.log(`  [Douban] 未找到书籍ID`);
+      return null;
+    }
+    console.log(`  [Douban] 找到 Subject ID: ${subjectId}`);
 
+    // Try to get cover from search results first
+    const imgMatch = searchHtml.match(/src="(https:\/\/img\d+\.doubanio\.com\/view\/subject\/[lms]\/public\/[^"]+)"/);
+    if (imgMatch) {
+      coverUrl = imgMatch[1].replace(/\/[ms]\//, '/l/');
+      console.log(`  [Douban] 搜索页找到封面`);
+    }
+
+    // Step 2: Fetch subject page for cover + metadata
+    const subjectUrl = `https://book.douban.com/subject/${subjectId}/`;
+    const subRes = await fetch(subjectUrl, { signal: AbortSignal.timeout(10000), headers });
+    if (subRes.ok) {
+      const subHtml = await subRes.text();
+
+      // Cover image from subject page
+      if (!coverUrl) {
+        const subImg = subHtml.match(/src="(https:\/\/img\d+\.doubanio\.com\/view\/subject\/[lms]\/public\/[^"]+)"/);
+        if (subImg) coverUrl = subImg[1].replace(/\/[ms]\//, '/l/');
+      }
+
+      // Description
+      let description = '';
+      const descPatterns = [
+        /<span\s+class="all\s*hidden">\s*<div\s+class="intro">\s*<p>([\s\S]*?)<\/p>/,
+        /<div\s+class="intro">\s*<p>([\s\S]*?)<\/p>/,
+        /<meta\s+name="description"\s+content="([^"]+)"/,
+      ];
+      for (const pat of descPatterns) {
+        const m = subHtml.match(pat);
+        if (m) { description = m[1].replace(/<[^>]+>/g, '').trim().slice(0, 500); break; }
+      }
+
+      // Author from subject page
+      if (!author || author === '') {
+        const authorMatch = subHtml.match(/<span\s+class="pl">\s*作者[\s\S]*?<a\s+[^>]*>([^<]+)<\/a>/);
+        if (authorMatch) author = authorMatch[1].trim();
+      }
+
+      // Publisher info
+      const pubMatch = subHtml.match(/出版社:\s*<\/span>\s*([^<\n]+)/);
+      const publisher = pubMatch ? pubMatch[1].trim() : '';
+
+      const yearMatch = subHtml.match(/出版年:\s*<\/span>\s*([^<\n]+)/);
+      const year = yearMatch ? yearMatch[1].trim() : '';
+
+      if (coverUrl) console.log(`  [Douban] 详情页获取封面成功`);
+
+      return {
+        title,
+        author: author || '未知',
+        coverUrl,
+        description: description || '',
+        publisher,
+        year,
+        isbn: subjectId,
+        source: 'douban',
+      };
+    }
+
+    // Subject page failed, return what we have from search
     return {
       title,
       author: author || '未知',
       coverUrl,
-      description: descSnippet || '',
+      description: '',
       publisher: '',
       year: '',
       isbn: subjectId,
@@ -140,20 +208,38 @@ async function downloadCover(url, destDir) {
 async function fetchBookData(book) {
   const { title, author } = book;
 
-  let result = null;
-  // Try each source in order
-  try { result = await fetchFromGoogleBooks(title, author); } catch (err) { console.log(`  [GoogleBooks] 错误: ${err.message}`); }
-  if (!result || !result.coverUrl) {
-    try { result = await fetchFromOpenLibrary(title, author); } catch (err) { console.log(`  [OpenLibrary] 错误: ${err.message}`); }
-  }
-  if (!result || !result.coverUrl) {
-    try { result = await fetchFromDouban(title, author); } catch (err) { console.log(`  [Douban] 错误: ${err.message}`); }
-  }
-  if (!result) {
-    result = buildFallbackData(book);
+  // Try all sources in parallel, collect results
+  const sources = [
+    { name: 'GoogleBooks', fn: () => fetchFromGoogleBooks(title, author) },
+    { name: 'OpenLibrary', fn: () => fetchFromOpenLibrary(title, author) },
+    { name: 'Douban', fn: () => fetchFromDouban(title, author) },
+  ];
+
+  const results = await Promise.allSettled(
+    sources.map(async (s) => {
+      try {
+        const r = await s.fn();
+        if (r) console.log(`  [${s.name}] 封面: ${r.coverUrl ? '有' : '无'}, 简介: ${(r.description || '').length}字`);
+        return r;
+      } catch (err) {
+        console.log(`  [${s.name}] 错误: ${err.message}`);
+        return null;
+      }
+    })
+  );
+
+  const data = results.map(r => r.value).filter(Boolean);
+
+  // Pick best: has cover > has description > first result
+  const best = data.find(d => d.coverUrl) || data.find(d => d.description) || data[0];
+
+  if (best) {
+    console.log(`  -> 选用: ${best.source}${best.coverUrl ? ' (有封面)' : ''}`);
+    return best;
   }
 
-  return result;
+  console.log('  所有来源均无结果，使用 fallback');
+  return buildFallbackData(book);
 }
 
 module.exports = { fetchBookData, downloadCover, slugify };
