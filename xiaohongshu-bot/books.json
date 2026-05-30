@@ -44,7 +44,8 @@
   {
     "title": "红楼梦",
     "author": "曹雪芹",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-30"
   },
   {
     "title": "1984",
