@@ -40,7 +40,6 @@ function addBook(title, author) {
     return;
   }
   author = author || '';
-  }
   const books = readBooks();
   const exists = books.some(b => b.title === title && b.author === author);
   if (!exists) {
