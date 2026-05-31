@@ -68,7 +68,8 @@
   {
     "title": "记一忘三二",
     "author": "李娟",
-    "used": false
+    "used": true,
+    "usedDate": "2026-05-31"
   },
   {
     "title": "如果我们无法以光速前行",
