@@ -98,7 +98,8 @@
   {
     "title": "失落的卫星",
     "author": "刘子超",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-05"
   },
   {
     "title": "美丽新世界",
