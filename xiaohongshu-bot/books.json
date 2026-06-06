@@ -104,7 +104,8 @@
   {
     "title": "美丽新世界",
     "author": "阿道司·赫胥黎",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-06"
   },
   {
     "title": "夜晚的潜水艇",
