@@ -116,7 +116,8 @@
   {
     "title": "九故事",
     "author": "J.D.塞林格",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-08"
   },
   {
     "title": "索拉里斯星",
