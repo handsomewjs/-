@@ -128,7 +128,8 @@
   {
     "title": "绝叫",
     "author": "叶真中显",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-10"
   },
   {
     "title": "老人与海",
