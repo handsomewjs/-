@@ -134,7 +134,8 @@
   {
     "title": "老人与海",
     "author": "厄内斯特·海明威",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-11"
   },
   {
     "title": "小径分叉的花园",
