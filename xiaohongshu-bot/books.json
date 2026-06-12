@@ -140,7 +140,8 @@
   {
     "title": "小径分叉的花园",
     "author": "豪尔赫·路易斯·博尔赫斯",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-12"
   },
   {
     "title": "沙之书",
