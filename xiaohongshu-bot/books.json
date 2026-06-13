@@ -146,7 +146,8 @@
   {
     "title": "沙之书",
     "author": "豪尔赫·路易斯·博尔赫斯",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-13"
   },
   {
     "title": "春月",
