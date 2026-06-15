@@ -158,7 +158,8 @@
   {
     "title": "存在主义心理治疗",
     "author": "欧文·亚隆",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-15"
   },
   {
     "title": "疯癫与文明",
