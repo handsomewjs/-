@@ -170,7 +170,8 @@
   {
     "title": "未来学大会",
     "author": "斯坦尼斯瓦夫·莱姆",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-17"
   },
   {
     "title": "流俗地",
