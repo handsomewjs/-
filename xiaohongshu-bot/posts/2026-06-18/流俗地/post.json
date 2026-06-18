@@ -1,0 +1,44 @@
+{
+  "date": "2026-06-18",
+  "book": {
+    "title": "流俗地",
+    "author": "黎紫书",
+    "coverUrl": "https://books.google.com/books/content?id=77qezgEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+    "description": "暂无简介",
+    "publisher": "未知",
+    "year": "2021",
+    "isbn": "7530221280, 9787530221280",
+    "source": "google_books"
+  },
+  "content": {
+    "headline": "这本书让我在地铁上哭成狗",
+    "review": "昨晚失眠，随手翻开《流俗地》，结果一口气读到天亮。📖 黎紫书写的马来西亚小城，像老旧风扇在头顶吱呀转，闷热又真实。主角银霞是个盲女，但她的世界比谁都明亮——那些鸡飞狗跳的日常、邻居的闲言碎语、初恋的甜和苦，全被她用耳朵和心记住了。\n\n读着读着，突然想起小时候外婆家的午后，空气里有樟脑丸和旧报纸的味道。书里没有大道理，就是一群普通人的生老病死，可每个字都扎心。特别是银霞和她妈的那段对话，我差点在地铁上哭出声。💡 原来最深的感情，都藏在最琐碎的日常里。\n\n如果你也想过“为什么人生这么难”，这本会给你一个拥抱。不是鸡汤，是那种“我懂你”的默契。",
+    "quotes": [
+      "银霞啊，这世上的人，哪个不是摸黑走路？",
+      "她的眼睛看不见，但她的世界比谁都亮堂。",
+      "有些话，说出来是刀，不说出来是刺。",
+      "日子像旧报纸，翻一页就碎一页。",
+      "她记得每一个声音，却记不住自己的影子。"
+    ],
+    "tags": [
+      "#流俗地",
+      "#黎紫书",
+      "#华语文学",
+      "#治愈",
+      "#马来西亚",
+      "#打工人"
+    ],
+    "coverMood": "盲眼看见的人间烟火",
+    "coverStyle": "warm"
+  },
+  "images": [
+    "images/01-cover.png",
+    "images/02-quote.png",
+    "images/03-quote.png",
+    "images/04-quote.png",
+    "images/05-quote.png",
+    "images/06-quote.png",
+    "images/07-end.png"
+  ],
+  "generatedAt": "2026-06-18T14:51:27.489Z"
+}
