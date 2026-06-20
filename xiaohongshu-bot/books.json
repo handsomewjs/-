@@ -188,7 +188,8 @@
   {
     "title": "营销管理",
     "author": "菲利普·科特勒",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-20"
   },
   {
     "title": "纳瓦尔宝典",
