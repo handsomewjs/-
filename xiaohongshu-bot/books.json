@@ -194,7 +194,8 @@
   {
     "title": "纳瓦尔宝典",
     "author": "埃里克·乔根森",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-21"
   },
   {
     "title": "高效能人士的七个习惯",
