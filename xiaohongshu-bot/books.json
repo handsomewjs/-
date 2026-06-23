@@ -206,7 +206,8 @@
   {
     "title": "和平戛然而止",
     "author": "玛格丽特·麦克米伦",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-23"
   },
   {
     "title": "东京八平米",
