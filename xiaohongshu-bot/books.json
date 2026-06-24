@@ -212,7 +212,8 @@
   {
     "title": "东京八平米",
     "author": "吉井忍",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-24"
   },
   {
     "title": "赡养人类",
