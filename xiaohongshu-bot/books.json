@@ -224,7 +224,8 @@
   {
     "title": "野兽国",
     "author": "莫里斯·桑达克",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-26"
   },
   {
     "title": "怪画谜案",
