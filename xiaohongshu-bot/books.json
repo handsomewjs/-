@@ -230,7 +230,8 @@
   {
     "title": "怪画谜案",
     "author": "雨穴",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-27"
   },
   {
     "title": "画纱",
