@@ -236,7 +236,8 @@
   {
     "title": "画纱",
     "author": "毛姆",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-28"
   },
   {
     "title": "论爱欲",
