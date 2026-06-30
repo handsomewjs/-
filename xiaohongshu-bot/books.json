@@ -248,7 +248,8 @@
   {
     "title": "来世",
     "author": "阿卜杜勒拉扎克·古尔纳",
-    "used": false
+    "used": true,
+    "usedDate": "2026-06-30"
   },
   {
     "title": "叙事本能",
