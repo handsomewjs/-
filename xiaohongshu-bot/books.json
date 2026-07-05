@@ -278,7 +278,8 @@
   {
     "title": "四季书店",
     "author": "",
-    "used": false
+    "used": true,
+    "usedDate": "2026-07-05"
   },
   {
     "title": "平凡的世界",
